@@ -1,6 +1,13 @@
 <template>
   <div>
-    <v-alert v-if="err !== ''" outlined type="error" style="white-space:pre-wrap;" text>{{ err }}</v-alert>
+    <v-alert
+      v-if="err !== ''"
+      outlined
+      type="error"
+      style="white-space:pre-wrap;"
+      text
+      >{{ err }}</v-alert
+    >
     <b-card class="text-center py-3 shadow-sm" v-show="!loading">
       <b-card-text>
         <p class="display-2 font-weight-bold text-success mb-5">Rakuppo</p>
@@ -14,7 +21,7 @@
         >
           <div class="px-3">
             <img class="pb-1" src="@/assets/img/google_icon.png" />
-            <span class="ml-1" style="color:#6a6a6a">Googleアカウントでログイン</span>
+            <span class="ml-1" style="color:#6a6a6a">ログイン</span>
           </div>
         </v-btn>
         <div>
@@ -25,7 +32,6 @@
     <Loading v-show="loading"></Loading>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import firebase from "firebase/app";
@@ -33,22 +39,21 @@ import { mapActions } from "vuex";
 import Loading from "@/components/common/Loading.vue";
 import AUTHORITY from "@/assets/js/Authority.js";
 import STATUS from "@/assets/js/Status.js";
-
 export default {
   data() {
     return {
       name: "Login",
       err: "",
-      loading: true
+      loading: true,
     };
   },
   components: {
-    Loading
+    Loading,
   },
   computed: {
     token() {
       return this.$store.state.token;
-    }
+    },
   },
   methods: {
     ...mapActions([
@@ -59,107 +64,88 @@ export default {
       "switchLoginStatus",
       "getEmployeeList",
       "getDepList",
-      "setToken"
+      "setToken",
     ]),
     toPage(path) {
       this.$router.push(path);
-    }
+    },
   },
   mounted() {
     axios.defaults.headers.common["Authorization"] = "";
-    firebase.auth().onAuthStateChanged(user => {
-      this.loading = false;
-      if (user) {
-        this.setFirebaseUser(user);
-        var googleMailAddress = firebase.auth().currentUser.email;
-        axios
-          .post("/loginCheck", {
-            mail: googleMailAddress
-          })
-          .then(response => {
-            this.setLoginUser(response.data);
-            this.getDepList(response.data.depList);
-            //新規登録画面へ遷移
-            if (response.data.authority == AUTHORITY.UNREGISTERED) {
-                        this.$router.push("/registerUser");
-              //管理者権限
-            } else if (response.data.authority == AUTHORITY.ADMIN) {
-              /** 管理者権限の場合 */
-              /** APIへログイン */
-              axios
-                .post("/login", {
-                  mailAddress: googleMailAddress,
-                  password: googleMailAddress
-                })
-                .then(apiLoginResponse => {
-                  this.setLoginUser(response.data);
-                  this.getDepList();
-                  this.switchLoginStatus(true);
-                  Promise.resolve()
-                    .then(() =>
-                      this.setToken(apiLoginResponse.headers["authorization"])
-                    )
-                    .then(
-                      () =>
-                        (axios.defaults.headers.common[
-                          "Authorization"
-                        ] = this.token)
-                    )
-                    .then(() => this.getEmployeeList())
-                    .then(() => this.$router.push("/home"));
-
-                  //全従業員情報を取得
-                });
-            } else if (response.data.authority == AUTHORITY.USER) {
-              /** ユーザー権限の場合 */
-              axios
-                .post("/login", {
-                  mailAddress: googleMailAddress,
-                  password: googleMailAddress
-                })
-                .then(apiLoginResponse => {
-                  this.setLoginUser(response.data);
-                  this.getDepList();
-                  this.switchLoginStatus(true);
-                  Promise.resolve()
-                    .then(() =>
-                      this.setToken(apiLoginResponse.headers["authorization"])
-                    )
-                    .then(
-                      () =>
-                        (axios.defaults.headers.common[
-                          "Authorization"
-                        ] = this.token)
-                    )
-                    .then(() => this.$router.push("/home"));
-                })
-                .catch(error => {
-                  console.log(error);
-                });
-            } else if (response.data.authority == AUTHORITY.OUTSIDER) {
-              /** メールアドレスのドメインが組織外のユーザーの場合 */
-              this.deleteLoginUser();
-              firebase.auth().signOut();
-              this.err =
-                "メールドメインがrakus-partners.co.jp\nまたはrakus.co.jpのユーザーのみログインできます";
-            } else if (response.data.status == STATUS.DELETED) {
-              /** メールアドレスのドメインが組織外のユーザーの場合 */
-              this.deleteLoginUser();
-              firebase.auth().signOut();
-              this.err = "アカウントが削除されているためログインできません";
-            }
-          })
-          .catch(error => {
-            console.log(error);
-            alert("異常が発生しました。")
-            this.$router.push("/");
-          });
-        this.loading = true;
-      } else {
-        firebase.auth().signOut();
-        this.deleteLoginUser();
-      }
-    });
-  }
+    this.loading = false;
+    axios
+      .post("/loginCheck", {
+        mail: "gest@rakus-partners.co.jp",
+        password: "gest@rakus-partners.co.jp",
+      })
+      .then((response) => {
+        this.setLoginUser(response.data);
+        this.getDepList(response.data.depList); //新規登録画面へ遷移
+        if (response.data.authority == AUTHORITY.UNREGISTERED) {
+          this.$router.push("/registerUser"); //管理者権限
+        } else if (response.data.authority == AUTHORITY.ADMIN) {
+          axios
+            .post("/login", {
+              mailAddress: "gest@rakus-partners.co.jp",
+              password: "gest@rakus-partners.co.jp",
+            })
+            .then((apiLoginResponse) => {
+              console.log(apiLoginResponse);
+              this.setLoginUser(response.data);
+              this.getDepList();
+              this.switchLoginStatus(true);
+              Promise.resolve()
+                .then(() =>
+                  this.setToken(apiLoginResponse.headers["authorization"])
+                )
+                .then(
+                  () =>
+                    (axios.defaults.headers.common[
+                      "Authorization"
+                    ] = this.token)
+                )
+                .then(() => this.getEmployeeList())
+                .then(() => this.$router.push("/home")); //全従業員情報を取得
+            });
+        } else if (response.data.authority == AUTHORITY.USER) {
+          axios
+            .get("/login", {})
+            .then((apiLoginResponse) => {
+              this.setLoginUser(response.data);
+              this.getDepList();
+              this.switchLoginStatus(true);
+              Promise.resolve()
+                .then(() =>
+                  this.setToken(apiLoginResponse.headers["authorization"])
+                )
+                .then(
+                  () =>
+                    (axios.defaults.headers.common[
+                      "Authorization"
+                    ] = this.token)
+                )
+                .then(() => this.$router.push("/home"));
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else if (response.data.authority == AUTHORITY.OUTSIDER) {
+          this.deleteLoginUser();
+          firebase.auth().signOut();
+          this.err =
+            "メールドメインがrakus-partners.co.jp\nまたはrakus.co.jpのユーザーのみログインできます";
+        } else if (response.data.status == STATUS.DELETED) {
+          this.deleteLoginUser();
+          firebase.auth().signOut();
+          this.err = "アカウントが削除されているためログインできません";
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert("異常が発生しました。");
+        this.$router.push("/");
+      });
+    this.loading = true;
+  },
 };
 </script>

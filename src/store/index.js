@@ -11,9 +11,9 @@ Vue.use(Vuex);
 
 const getDefaultState = () => {
   return {
-    token:"",
+    token: "",
     loginUser: {
-      authority: 2, // 初期値は2(一般ユーザー権限)で指定
+      authority: 1, // 初期値は2(一般ユーザー権限)で指定
       depId: 0,
       hireDate: "",
       registerDate: "",
@@ -206,7 +206,6 @@ export default new Vuex.Store({
         (employee) => employee.userId === updateEmployee[0].userId
       )[0].version = updateEmployee[0].version;
       state.employeeList.filter(
-        
         (employee) => employee.userId === updateEmployee[0].userId
       )[0].depId = updateEmployee[0].depId;
     },
@@ -233,20 +232,20 @@ export default new Vuex.Store({
     },
 
     /* トークンをセットするメソッド.
-     * 
-     * @param {*} token トークン 
+     *
+     * @param {*} token トークン
      */
-    setToken(state,token){
-      state.token = token
+    setToken(state, token) {
+      state.token = token;
     },
 
     /**
      * 未投稿者のuserIdをstateに格納するメソッド.
      * @param {*} unAnswerduserId 未投稿者のuserId
      */
-    setUnansweredId(state,unAnswereduserId){
-      state.unAnsweredId.push(unAnswereduserId)
-    }
+    setUnansweredId(state, unAnswereduserId) {
+      state.unAnsweredId.push(unAnswereduserId);
+    },
   },
   actions: {
     /**
@@ -255,8 +254,8 @@ export default new Vuex.Store({
     login() {
       const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
       googleAuthProvider.setCustomParameters({
-        prompt: 'select_account'
-      }); 
+        prompt: "select_account",
+      });
       firebase.auth().signInWithRedirect(googleAuthProvider);
       /** ドメインを２つ指定できないためコメントアウトしました */
       // googleAuthProvider.setCustomParameters({
@@ -449,19 +448,18 @@ export default new Vuex.Store({
     resetState({ commit }) {
       commit("resetState");
     },
-    
-    setToken({commit},token){
-      commit("setToken",token);
+
+    setToken({ commit }, token) {
+      commit("setToken", token);
     },
 
     /**
      * 未投稿者のユーザーIdをstateに格納する
      * @param {*} userId 未投稿者のuserId
      */
-    setUnansweredId({commit},unAnswereduserId){
-    
-      commit("setUnansweredId",unAnswereduserId)
-    }
+    setUnansweredId({ commit }, unAnswereduserId) {
+      commit("setUnansweredId", unAnswereduserId);
+    },
   },
 
   getters: {
